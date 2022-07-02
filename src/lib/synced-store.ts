@@ -25,7 +25,6 @@ export interface GamePlayer {
 
 export enum GameState {
   Waiting,
-  Prepare,
   Start,
   Ended,
 }
