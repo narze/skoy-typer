@@ -312,8 +312,8 @@
   // }
 </script>
 
-<div class="flex flex-col gap-12 justify-between">
-  <div class="flex flex-col gap-6 border-blue-500 pr-12">
+<div class="flex flex-col gap-12 justify-between w-full">
+  <div class="flex flex-col gap-6 border-blue-500 container mx-auto">
     <div class="flex flex-col gap-2">
       {#each players as player, idx}
         <div class={`font-prompt ${player.color} px-2 py-1 rounded-lg`}>

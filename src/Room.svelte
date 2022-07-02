@@ -75,7 +75,7 @@
   <div
     class="flex {enteredRoom
       ? 'flex-col md:flex-row'
-      : 'flex-col'} items-center gap-6"
+      : 'flex-col'} items-center gap-6 container mx-auto"
   >
     {#if gameState === GameState.Waiting}
       <div
