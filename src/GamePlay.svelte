@@ -43,7 +43,8 @@
     }
     wrong = false
     right = false
-    wordInput = ""
+
+    // wordInput = ""
   }
 
   // $: console.log(JSON.parse(JSON.stringify(players)))
