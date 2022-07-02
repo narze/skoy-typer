@@ -33,7 +33,9 @@
         playerId)
 
   $: canStartGame =
-    isRoomOwner && roomPlayers.length > 1 && roomPlayers.every((p) => p.ready)
+    isRoomOwner &&
+    roomPlayers.length > 1 &&
+    roomPlayers.filter((p) => p.ready).length >= roomPlayers.length / 2
 
   function leaveRoom() {
     delete $store.roomPlayers[playerId]
