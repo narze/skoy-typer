@@ -55,7 +55,7 @@
   function nextState() {
     if (gameState == GameState.Start) {
       // TODO: Go to end state component
-      $svelteStore.gameData.state = GameState.Prepare
+      $svelteStore.gameData.state = GameState.Waiting
     } else {
       $svelteStore.gameData.state =
         (gameState + 1) % Object.keys(GameState).length
@@ -112,8 +112,6 @@
       > -->
     {:else if gameState === GameState.Waiting}
       <WaitingRoom store={svelteStore} {nextState} />
-    {:else if gameState === GameState.Prepare}
-      <PrepareMap store={svelteStore} {nextState} />
     {:else if gameState === GameState.Start}
       <GamePlay store={svelteStore} {nextState} />
     {:else if gameState === GameState.Ended}

@@ -18,7 +18,7 @@ export interface GamePlayer {
   y?: number
   direction?: "up" | "down" | "left" | "right"
   color?: string
-  hp?: number
+  score: number
   admin?: boolean
   enteredAt?: number
 }

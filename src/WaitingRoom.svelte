@@ -46,8 +46,9 @@
       $store.players.push({
         id: player.id,
         name: player.name,
-        admin: (player.id == playerId && isRoomOwner),
+        admin: player.id == playerId && isRoomOwner,
         enteredAt: player.enteredAt,
+        score: 0,
       })
     })
 

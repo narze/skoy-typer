@@ -2,28 +2,86 @@
   import type { GamePlayer, svelteStore } from "./lib/synced-store"
   import SVGIcon from "./lib/SVGIcon.svelte"
   import { player } from "./lib/player-store"
+  import Words from "./lib/words"
+  import Skoy from "skoy"
+  import { onMount } from "svelte"
+  import { fly } from "svelte/transition"
+
+  const MAX_ROUNDS = 3
 
   export let store: typeof svelteStore
   export let nextState: () => void
   let currentPlayerBeforeMove: GamePlayer
+  let words = Words.words
 
   const playerId = $player.id
   $: players = $store.players
+  $: currentPlayerIdx = $store.players.findIndex((p) => p.id == playerId)
+  $: currentPlayerScore = players[currentPlayerIdx].score
+  $: currentWordIdx = $store.gameData.currentWordIdx
+  $: currentWord = words[currentWordIdx] || "xxxxxxxxxxxxxxxxx"
   // $: currentPlayerIdx = $store.gameData.currentPlayerIdx || 0
-  $: maxDistance = $store.gameData.maxDistance || 0
-  $: distance = $store.gameData.distance || 0
-  $: rolled = $store.gameData.rolled || false
+  // $: maxDistance = $store.gameData.maxDistance || 0
+  // $: distance = $store.gameData.distance || 0
+  // $: rolled = $store.gameData.rolled || false
   $: currentPlayerBeforeMove = $store.gameData.currentPlayerBeforeMove || {}
   $: gameEnded = $store.gameData.gameEnded || false
+  $: alreadyGuessed = $store.gameData.alreadyGuessed || false
   // $: isMyTurn = players[currentPlayerIdx].id === playerId
   // $: currentPlayer = players[currentPlayerIdx]
   $: isRoomOwner = $store.players.find((p) => p.id == playerId)?.admin
+  let roundCount = 1
 
-  $: console.log(JSON.parse(JSON.stringify(players)))
+  // $: console.log(JSON.parse(JSON.stringify(players)))
 
-  const words = []
+  // let currentWord = words[~~(Math.random() * words.length)]
+  let solution = ""
+  let wordInput = ""
+  let wrong = false
 
-  let rountCount = 20
+  // $: console.log({ currentWord })
+  $: if (roundCount > MAX_ROUNDS) {
+    $store.gameData.gameEnded = true
+  }
+
+  onMount(() => {
+    if (isRoomOwner) {
+      $store.gameData.currentWordIdx = ~~(Math.random() * words.length)
+    }
+  })
+
+  function showSolution() {
+    alreadyGuessed = true
+    solution = currentWord
+  }
+
+  function guess() {
+    if (gameEnded) {
+      return
+    }
+    // console.log({ wordInput, currentWord })
+
+    if (wordInput === currentWord && !alreadyGuessed) {
+      $store.gameData.alreadyGuessed = true
+      players[currentPlayerIdx].score += 1
+      wrong = false
+    } else {
+      wrong = true
+    }
+
+    wordInput = ""
+  }
+
+  function skip() {
+    roundCount += 1
+    $store.gameData.alreadyGuessed = false
+    $store.gameData.roundCount++
+    solution = ""
+    $store.gameData.currentWordIdx = ~~(Math.random() * words.length)
+    // words = words.filter((w) => w !== currentWord)
+    // currentWord = words[~~(Math.random() * words.length)]
+    wrong = false
+  }
 
   // const directions = {
   //   up: "🔼",
@@ -229,7 +287,7 @@
       delete p.x
       delete p.y
       delete p.direction
-      delete p.hp
+      delete p.score
     })
     $store.gameData.gameEnded = false
 
@@ -245,109 +303,78 @@
   // }
 </script>
 
-<div class="flex flex-row gap-12 justify-between">
-  <div class="flex gap-6 border-r-2 border-blue-500 pr-12">
-    <h1 class="text-6xl font-bold font-ubuntu text-blue-500">Players</h1>
+<div class="flex flex-col gap-12 justify-between">
+  <div class="flex flex-col gap-6 border-blue-500 pr-12">
     <div class="flex flex-col gap-2">
       {#each players as player, idx}
         <div class={`font-prompt ${player.color} px-2 py-1 rounded-lg`}>
           <p class="flex gap-2">
             <span
               >{player.name}
-              {player.id === playerId ? "(You)" : ""}</span
-            >
-            <span class="flex-auto text-right"
-              >{"💖".repeat(Number(player.hp))}</span
-            >
+              {player.id === playerId ? "(You)" : ""}
+            </span>
+            <span class="flex-1 text-right">
+              {player.score} ฆะเเนณร์
+            </span>
           </p>
         </div>
       {/each}
     </div>
-    {#if isRoomOwner}
-      you are admin
-    {:else}
-      you are player
-    {/if}
-    {#if gameEnded}
-      <div class="flex justify-center gap-2">
-        <button class="btn" on:click={restartGame}>Restart</button>
-        <button class="btn btn-error" on:click={() => (location.href = "/")}
-          >Back</button
-        >
-      </div>
-    {/if}
-  </div>
-  <!-- {JSON.stringify(currentPlayerBeforeMove)} -->
-  <div class="flex flex-row items-center gap-6">
-    <!-- <div class="controls flex flex-row gap-8 justify-center">
-      <div class="flex flex-col gap-2">
-        <div class="flex gap-2">
-          <span class="w-16 h-16" />
-          <button
-            on:click={onUp}
-            disabled={!canWalk["up"]}
-            class={`btn w-16 h-16 border rounded flex items-center justify-center`}
-            >Up</button
-          >
-          <span class="w-16 h-16" />
-        </div>
-        <div class="flex gap-2">
-          <button
-            on:click={onLeft}
-            disabled={!canWalk["left"]}
-            class={`btn w-16 h-16 border rounded flex items-center justify-center`}
-            >Left</button
-          >
-          <button
-            on:click={onAtk}
-            disabled={!attackable}
-            class={`btn w-16 h-16 border rounded flex items-center justify-center ${
-              !attackable ? "btn-disabled" : ""
-            }`}>Atk</button
-          >
-          <button
-            on:click={onRight}
-            disabled={!canWalk["right"]}
-            class={`btn w-16 h-16 border rounded flex items-center justify-center`}
-            >Right</button
-          >
-        </div>
-        <div class="flex gap-2">
-          <span class="w-16 h-16" />
-          <button
-            on:click={onDown}
-            disabled={!canWalk["down"]}
-            class={`btn w-16 h-16 border rounded flex items-center justify-center`}
-            >Down</button
-          >
-          <span class="w-16 h-16" />
-        </div>
-      </div>
+    <span class="text-6xl font-bold font-ubuntu text-blue-500 border-t-2" />
+    <div class="flex flex-col gap-4">
+      {#if isRoomOwner}
+        {#if gameEnded}
+          จบเกม!
 
-      <div class="flex flex-col gap-2">
-        <button
-          on:click={rollDice}
-          disabled={gameEnded || !isMyTurn || rolled}
-          class="btn">Roll 🎲</button
-        >
-        <button
-          on:click={resetWalk}
-          disabled={!isMyTurn || !rolled || distance == 0}
-          class="btn">Reset</button
-        >
-        {#if rolled}
-          <div class="flex flex-col items-center">
-            <SVGIcon
-              class="mt-2"
-              name={`dice_${maxDistance}`}
-              width={"3rem"}
-              height={"3rem"}
-            />
-            <div class="mt-4 text-xl">{distance}/{maxDistance ?? ""}</div>
+          <div class="flex justify-center gap-2">
+            <button class="btn btn-error" on:click={() => (location.href = "/")}
+              >Back</button
+            >
           </div>
+        {:else}
+          <div class="my-8" />
+
+          ฆำที่ซ๋ว์: {roundCount} / {MAX_ROUNDS}
+          <h1
+            class="text-6xl border rounded-xl border-green-600 p-8"
+            in:fly={{ y: 200, duration: 2000 }}
+          >
+            {Skoy.convert(currentWord)}
+          </h1>
+
+          {#if solution.length > 0}
+            <h1
+              class="text-3xl text-green-600"
+              in:fly={{ y: 200, duration: 2000 }}
+            >
+              {solution}
+            </h1>
+          {/if}
+
+          <div class="my-8" />
+
+          <button class="btn" on:click={showSolution}>Solution</button>
+          <button class="btn" on:click={skip}>Skip</button>
         {/if}
-      </div>
+      {:else}
+        คะแณนฮ์ค๋องคุญ: {currentPlayerScore || 0}
+        <form on:submit|preventDefault={guess} class="flex flex-col gap-3">
+          <!-- svelte-ignore a11y-autofocus -->
+          <input
+            type="text"
+            class={`input input-xl text-4xl h-24 text-center ${
+              wrong ? "bg-red-400" : ""
+            }`}
+            bind:value={wordInput}
+            autofocus={true}
+            disabled={alreadyGuessed}
+          />
+
+          <button type="submit" class="btn btn-lg" disabled={alreadyGuessed}
+            >ฑายคำาม์</button
+          >
+        </form>
+      {/if}
     </div>
-  -->
   </div>
 </div>
