@@ -7,12 +7,13 @@
   import { onMount } from "svelte"
   import { fly } from "svelte/transition"
 
-  const MAX_ROUNDS = 3
+  const MAX_ROUNDS = 20
 
   export let store: typeof svelteStore
   export let nextState: () => void
   let currentPlayerBeforeMove: GamePlayer
   let words = Words.words
+  let input
 
   const playerId = $player.id
   $: players = $store.players
@@ -30,11 +31,16 @@
   // $: isMyTurn = players[currentPlayerIdx].id === playerId
   // $: currentPlayer = players[currentPlayerIdx]
   $: isRoomOwner = $store.players.find((p) => p.id == playerId)?.admin
+  $: adminUpdatedAt = $store.gameData.adminUpdatedAt
+
   let roundCount = 1
   let wrong = false
   let right = false
 
-  $: if (roundCount) {
+  $: if (adminUpdatedAt) {
+    if (input) {
+      input.focus()
+    }
     wrong = false
     right = false
   }
@@ -74,7 +80,7 @@
       right = true
     } else {
       wrong = true
-      right = fause
+      right = false
     }
 
     wordInput = ""
@@ -88,8 +94,9 @@
     $store.gameData.currentWordIdx = ~~(Math.random() * words.length)
     // words = words.filter((w) => w !== currentWord)
     // currentWord = words[~~(Math.random() * words.length)]
-    wrong = false
-    right = false
+    // wrong = false
+    // right = false
+    $store.gameData.adminUpdatedAt = new Date()
   }
 
   // const directions = {
@@ -370,6 +377,7 @@
         <form on:submit|preventDefault={guess} class="flex flex-col gap-3">
           <!-- svelte-ignore a11y-autofocus -->
           <input
+            bind:this={input}
             type="text"
             class={`input input-xl text-4xl h-24 text-center ${
               wrong ? "bg-red-400" : ""
