@@ -16,6 +16,7 @@
   import PrepareMap from "./PrepareMap.svelte"
   import GamePlay from "./GamePlay.svelte"
   import NavBar from "./NavBar.svelte"
+  import QRCode from "qrcode"
 
   export let roomId = ""
   export let createRoom: boolean
@@ -23,6 +24,11 @@
   const webrtcProvider = connectRoom(roomId)
 
   $: gameState = $svelteStore.gameData.state || GameState.Waiting
+  let qrcode = ""
+
+  onMount(async () => {
+    qrcode = await QRCode.toDataURL(window.location.href)
+  })
 
   const playerId = $player.id
 
@@ -84,6 +90,15 @@
           <p class="text-5xl font-bold text-blue-400 font-ubuntu">
             Room ID: {roomId}
           </p>
+          {#if qrcode.length}
+            <div class="w-full">
+              <img
+                src={qrcode.replace("/create", "")}
+                alt="QR Code"
+                class="w-32 h-32 mx-auto object-cover object-center"
+              />
+            </div>
+          {/if}
         </div>
         <div class="text-left">
           {#each Object.entries($svelteStore.roomPlayers) as [pId, player]}

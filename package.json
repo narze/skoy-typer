@@ -45,6 +45,7 @@
   "dependencies": {
     "prettier": "^2.5.1",
     "prettier-plugin-svelte": "^2.6.0",
+    "qrcode": "^1.5.0",
     "skoy": "^0.3.2"
   }
 }
