@@ -31,13 +31,19 @@
   // $: currentPlayer = players[currentPlayerIdx]
   $: isRoomOwner = $store.players.find((p) => p.id == playerId)?.admin
   let roundCount = 1
+  let wrong = false
+  let right = false
+
+  $: if (roundCount) {
+    wrong = false
+    right = false
+  }
 
   // $: console.log(JSON.parse(JSON.stringify(players)))
 
   // let currentWord = words[~~(Math.random() * words.length)]
-  let solution = ""
+  // let solution = ""
   let wordInput = ""
-  let wrong = false
 
   // $: console.log({ currentWord })
   $: if (roundCount > MAX_ROUNDS) {
@@ -51,8 +57,8 @@
   })
 
   function showSolution() {
-    alreadyGuessed = true
-    solution = currentWord
+    // solution = currentWord
+    $store.gameData.alreadyGuessed = true
   }
 
   function guess() {
@@ -62,11 +68,13 @@
     // console.log({ wordInput, currentWord })
 
     if (wordInput === currentWord && !alreadyGuessed) {
-      $store.gameData.alreadyGuessed = true
+      showSolution()
       players[currentPlayerIdx].score += 1
       wrong = false
+      right = true
     } else {
       wrong = true
+      right = fause
     }
 
     wordInput = ""
@@ -76,11 +84,12 @@
     roundCount += 1
     $store.gameData.alreadyGuessed = false
     $store.gameData.roundCount++
-    solution = ""
+    // solution = ""
     $store.gameData.currentWordIdx = ~~(Math.random() * words.length)
     // words = words.filter((w) => w !== currentWord)
     // currentWord = words[~~(Math.random() * words.length)]
     wrong = false
+    right = false
   }
 
   // const directions = {
@@ -278,21 +287,21 @@
   //   $store.gameData.maxDistance = 0
   // }
 
-  function restartGame() {
-    $store.gameData.currentPlayerIdx = 0
-    $store.gameData.rolled = false
-    $store.gameData.distance = 0
-    $store.gameData.maxDistance = 0
-    $store.players.forEach((p) => {
-      delete p.x
-      delete p.y
-      delete p.direction
-      delete p.score
-    })
-    $store.gameData.gameEnded = false
+  // function restartGame() {
+  //   $store.gameData.currentPlayerIdx = 0
+  //   $store.gameData.rolled = false
+  //   $store.gameData.distance = 0
+  //   $store.gameData.maxDistance = 0
+  //   $store.players.forEach((p) => {
+  //     delete p.x
+  //     delete p.y
+  //     delete p.direction
+  //     delete p.score
+  //   })
+  //   $store.gameData.gameEnded = false
 
-    nextState()
-  }
+  //   nextState()
+  // }
 
   // function checkWinner() {
   //   if (players.filter((p) => p.hp > 0).length === 1) {
@@ -342,12 +351,12 @@
             {Skoy.convert(currentWord)}
           </h1>
 
-          {#if solution.length > 0}
+          {#if alreadyGuessed}
             <h1
               class="text-3xl text-green-600"
               in:fly={{ y: 200, duration: 2000 }}
             >
-              {solution}
+              {currentWord}
             </h1>
           {/if}
 
@@ -365,6 +374,7 @@
             class={`input input-xl text-4xl h-24 text-center ${
               wrong ? "bg-red-400" : ""
             }`}
+            placeholder={right ? Skoy.convert("ถูกต้อง!") : ""}
             bind:value={wordInput}
             autofocus={true}
             disabled={alreadyGuessed}
