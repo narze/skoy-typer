@@ -28,7 +28,7 @@
   </div>
   <div class="navbar-center">
     <span class="btn btn-ghost normal-case text-xl"
-      >That Paper Game | เกมกระดาษ</span
+      >Skoy Typer | แว้นบอย สก๊อยพิมพ์</span
     >
   </div>
   <div class="navbar-end">

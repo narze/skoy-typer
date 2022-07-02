@@ -49,7 +49,7 @@ const doc = getYjsValue(store)
 
 export const connectRoom = (roomId: string) => {
   const webrtcProvider = new WebrtcProvider(
-    `that-paper-game-${roomId}`,
+    `skoy-typer-${roomId}`,
     doc as any,
     // {
     //   config: {

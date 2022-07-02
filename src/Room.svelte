@@ -79,9 +79,9 @@
       >
         <div class="flex flex-col">
           <h1 class="text-6xl font-bold font-ubuntu text-blue-500">
-            That Paper Game
+            แว้นบอย สก๊อยพิมพ์
           </h1>
-          <p class="text-md font-bold text-blue-400 font-ubuntu">
+          <p class="text-5xl font-bold text-blue-400 font-ubuntu">
             Room ID: {roomId}
           </p>
         </div>

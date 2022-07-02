@@ -15,7 +15,7 @@ const defaultPlayer: Player = {
 
 const playerData: Player = {
   ...defaultPlayer,
-  ...JSON.parse(localStorage.getItem("that-paper-game-player") || "{}"),
+  ...JSON.parse(localStorage.getItem("skoy-typer-player") || "{}"),
 }
 
 // delete playerData.foo
@@ -23,5 +23,5 @@ const playerData: Player = {
 export const player = writable<Player>(playerData)
 
 player.subscribe((value) =>
-  localStorage.setItem("that-paper-game-player", JSON.stringify(value)),
+  localStorage.setItem("skoy-typer-player", JSON.stringify(value)),
 )
